@@ -1,0 +1,23 @@
+---
+title: "Task 3_Introduction to R and online R course"
+author: "Angela Jennifer Tantry"
+date: "2026-10-30"
+output: html_document
+---
+
+
+Most recent version of the R software and RStudio has been installed.
+
+Bioconductor and Tidyverse (including ggplot2) packages have been installed.
+The following script confirms the installation:
+
+> "BiocManager" %in% rownames(installed.packages())
+[1] TRUE
+
+> "tidyverse" %in% rownames(installed.packages())
+[1] TRUE
+
+> "ggplot2" %in% rownames(installed.packages())
+[1] TRUE
+
+R online courses have also been taken.

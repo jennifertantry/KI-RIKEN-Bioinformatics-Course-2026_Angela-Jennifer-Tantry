@@ -1,0 +1,36 @@
+---
+title: "Task 4_R basic operations"
+author: "Angela Jennifer Tantry"
+date: "2026-10-30"
+output: html_document
+---
+
+# Square root of 10
+```{r}
+sqrt(10)
+```
+
+# Logarithm of 32 to the base 2
+```{r}
+log(32, base = 2)
+```
+
+# Sum of the numbers from 1 to 1000
+```{r}
+sum(1:1000)
+```
+
+# Sum of all even numbers from 2 to 1000
+```{r}
+sum(seq(from = 2, to = 1000, by = 2))
+```
+
+# Number of pairwise comparisons for 100 genes
+```{r}
+choose(100, 2)
+```
+
+# Number of ways to arrange 100 genes in triples
+```{r}
+100*99*98
+```
