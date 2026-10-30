@@ -1,0 +1,12 @@
+---
+title: "Task 2_Git repositories and R markdown"
+author: "Angela Jennifer Tantry"
+date: "2026-10-30"
+output: html_document
+---
+
+All submission for my assignment can be accessed in my Github repository through the link below:
+
+https://github.com/jennifertantry/KI-RIKEN-Bioinformatics-Course-2026_Angela-Jennifer-Tantry/
+
+Thank you for assessing my assignments.
