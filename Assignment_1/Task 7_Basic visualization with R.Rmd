@@ -1,0 +1,259 @@
+---
+title: "Task 7_Basic visualization with R"
+author: "Angela Jennifer Tantry"
+date: "2026-11-01"
+output: html_document
+---
+
+To work on this task, firstly, ggplot2 package is loaded.
+```{r, message=FALSE}
+# Loading ggplot package
+library(ggplot2)
+```
+
+# 1. Comparing body heights distributions of the two species in magic_guys.csv dataset
+
+The magic_guys.csv dataset is loaded.
+```{r}
+# Loading magic_guys.csv dataset
+magic_guys <- read.csv("magic_guys.csv")
+```
+
+a. Histogram Visualization
+
+## Visualization using basic 'hist' function
+```{r}
+# Calculate shared breaks for histograms from both species
+common_breaks <- seq(
+  floor(min(magic_guys$length)/10)*10,   # set the minimum value of x-axis to the nearest round number of the minimum data in length
+  ceiling(max(magic_guys$length)/10)*10, # set the maximum value of x-axis to the nearest round number of the maximum data in length
+  by = 10                                # set the breaks by 10 increments
+)
+
+# Make the plot for Jedi species
+hist(magic_guys$length[magic_guys$species == "jedi"], # obtain length data of Jedi species
+     breaks = common_breaks,                          # set the breaks using previously calculated breaks
+     xaxt = "n",                                      # not using default x axis
+     xlim = c(60, 280),                               # adjust range of x axis
+     ylim = c(0, 10),                                 # adjust range of y axis
+     col = "lightcoral",
+     main = "Body Heights Distribution",
+     xlab = "Body Height",
+     ylab = "Frequency")
+# Make the plot for Sith species
+hist(magic_guys$length[magic_guys$species == "sith"], # obtain length data of Sith species
+     breaks = common_breaks,                          # set the breaks using previously calculated breaks
+     col = adjustcolor("cadetblue2", alpha.f=0.4),    # opacity adjusted to ensure visibility of both graphs
+     add = TRUE)
+
+axis(1, at = seq(60, 280, by = 20))                   # set x axis increments
+
+legend("topright",
+       legend = c("Jedi", "Sith"),
+       fill = c("lightcoral","cadetblue2"))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Visualization using 'ggplot' and 'geom_histogram'
+```{r}
+# Make the plot
+ggplot(magic_guys, aes(x = length, fill = species)) +
+  geom_histogram(
+    position = "identity",
+    alpha = 0.4,            # adjust opacity
+    binwidth = 10,          # make intervals of 10
+    boundary = 60,          # set the starting point of interval
+    color = "black"
+  ) +
+  scale_x_continuous(
+    breaks = seq(60, 280, by = 20), # set x axis in 20 increments
+    limits = c(60, 280)             # set minimum and maximum values of x axis
+  ) +
+  scale_fill_manual(
+    values = c(
+      "jedi" = "lightcoral",
+      "sith" = "cadetblue2"
+    )
+  ) +
+  labs(
+    x = "Body Height",
+    y = "Frequency",
+    title = "Body Heights Distribution"
+  ) +
+  theme_classic() +
+  theme(
+  plot.title = element_text(hjust = 0.5))
+```
+
+## b. Boxplot Visualization
+
+```{r}
+# Make the boxplot using ggplot
+ggplot(magic_guys, aes(x = species, y = length, fill = species)) +
+  geom_boxplot() +
+  scale_fill_manual(
+    values = c(
+      "jedi" = "lightcoral",
+      "sith" = "cadetblue2")
+  ) +
+  scale_y_continuous(
+  breaks = seq(50, 275, by = 25)   # set the y axis
+  ) +
+  labs(
+    x = "Species",
+    y = "Body Height",
+    title = "Body Heights Distribution"
+  ) +
+  theme_classic() +
+  theme(
+  plot.title = element_text(hjust = 0.5),
+  legend.position = "none")
+```
+
+## c. Saving the plots in png, pdf, and svg formats
+
+Different formats are useful for different applications.
+
+'png' file is useful for inserting figures into presentations or documents. However, the quality may be reduced if enlarged, especially if saved in lower resolution (DPI).
+
+On the other hand, 'pdf' file can usually be enlarged without losing the sharpness of the picture. It is suitable for publications and printing.
+
+'svg' is particulary useful for web use. It also stores the elements as vectors, making it editable. The figure can also be enlarged without decreasing its quality.
+
+# 2. microarray_data.tab dataset
+
+```{r}
+# Loading microarray_data.tab dataset
+microarray_data <- read.delim("microarray_data.tab")
+```
+
+a. Size of the matrix
+```{r}
+# Checking the dimension
+dim(microarray_data)
+```
+The result shows that the matrix consists of 553 rows and 1,000 columns.
+
+b. Missing values per gene and visualization
+```{r}
+# Calculating missing values per gene
+missing_per_gene <- colSums(is.na(microarray_data))
+
+# Visualization of missing values per gene using histogram
+hist(missing_per_gene,
+     main = "Missing Values per Gene",
+     xlab = "Number of Missing Values",
+     ylab = "Number of Genes",
+     breaks = 30)
+```
+
+c. Genes which there are more than X% (X = 10%, 20%, 50%) missing values
+```{r}
+# Making a vector of percentages of missing values per gene
+missing_percent <- (missing_per_gene / nrow(microarray_data)) * 100
+
+# Obtaining genes with more than 10% missing values
+names(missing_percent[missing_percent > 10])
+
+# Obtaining genes with more than 20% missing values
+names(missing_percent[missing_percent > 20])
+
+# Obtaining genes with more than 50% missing values
+names(missing_percent[missing_percent > 50])
+```
+
+d. Replacing the missing values by the average expression value for the particular gene
+```{r}
+# Obtaining means for each gene
+gene_means <- colMeans(microarray_data, na.rm = TRUE)
+```
+
+From summary, there are 34 genes with no value at all (NA)
+```{r}
+summary(gene_means)
+```
+Therefore, these 34 genes will be skipped.
+
+```{r}
+# Make a duplicate of data to be imputed
+imputed_data <- microarray_data
+
+# for loop is used to repeat task (replacing NA with the gene mean) for all genes
+for (gene in names(imputed_data)) {     # obtain each gene from the data
+  if (is.na(gene_means[gene])) {        # if the mean is missing, it will be skipped
+  next
+}
+  imputed_data[[gene]][                             # obtain all values of gene from the data
+  is.na(imputed_data[[gene]])] <- gene_means[gene]  # obtain gene with NA and replace with mean
+}
+```
+
+To check the imputed data:
+```{r}
+sum(is.na(imputed_data))
+sum(is.na(microarray_data))
+```
+
+Now, there are less NA values in the imputed data compared to the original microarray data. The remaining NA values are from the 34 genes which do not have means and therefore, skipped from imputation.
+
+If we take one gene example:
+```{r}
+summary(microarray_data$g1)
+summary(imputed_data$g1)
+```
+
+The summary shows that there are 130 NA values in the original microarray data of g1, but no more NA values in the imputed data.
+
+This confirms the imputation is successful.
+
+# 3. Visualizing the CO2 dataset to give us deeper understanding
+
+To further understand the dataset, I made a plot which could give us information on the comparison of the CO2 uptake trend between Quebec and Mississippi plants, as well as chilled and non-chilled plants.
+
+Each measurement is represented as individual data point and a line graph is also added to give us visualization of the trend.
+
+The following script is used to make the plot:
+```{r}
+# Make the plot
+ggplot(CO2, aes(
+  x = conc,
+  y = uptake,
+  color = Treatment,
+  group = Plant
+)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(~ Type) + # create two panels based on Type
+  labs(
+    title = "CO2 Uptake of Individual Plants",
+    x = "Ambient CO2 concentration",
+    y = "CO2 uptake",
+    color = "Treatment"
+  ) +
+  scale_x_continuous(
+    breaks = c(95, 175, 250, 350, 500, 675, 1000)
+  ) +
+  scale_color_manual(values = c(
+    "nonchilled" = "lightcoral",
+    "chilled" = "cadetblue2")
+    ) +
+    theme_classic() +
+  theme(
+  plot.title = element_text(hjust = 0.5))
+```
+
+Based on the plot, we are now able to see that the CO2 uptake generally increase with the CO2 concentration with a sharp increase from CO2 concentration of 95 to 175. However, it is notable that in non-chilled Quebec plants, two out of three plants show a decrease of CO2 uptake at CO2 concentration of 500, before the CO2 uptake increase again along with the CO2 concentration.
+
+Another notable observation is chilled plants tend to generally have lower CO2 uptake compared to non-chilled plants. CO2 uptake of Mississippi plants, both chilled and non-chilled, are also lower compared to Quebec plants.
