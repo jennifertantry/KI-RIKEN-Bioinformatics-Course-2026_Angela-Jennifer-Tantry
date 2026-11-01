@@ -1,0 +1,32 @@
+---
+title: "Task 6_R Functions"
+author: "Angela Jennifer Tantry"
+date: "2026-10-31"
+output: html_document
+---
+
+# Function that calculates the ratio of the mean and the median of a given vector
+```{r}
+mean_median_ratio <- function(x){
+  return((mean(x)/median(x)))
+}
+
+# Test run
+mean_median_ratio(c(1,2,3,4,5,6))
+```
+
+# Function that ignores the lowest and highest value from a given vector and calculate the mean
+```{r}
+extreme_excluded_mean <- function(x){
+  return(mean(x[-c((which.min(x)), which.max(x))]))
+}
+
+# Test run
+extreme_excluded_mean(c(5,3,7,2,9))
+```
+
+# Piping
+Pipes (%>%) pass a result from one operation to the next. It is useful for cases where multiple operations are needed. Pipes make the code more concise and readable. However, pipes should not be used if too many steps are required. For this case, intermediate objects should be used to make checking and understanding the code easier.
+
+# apply-family of functions
+Apply-family functions are useful to repeatedly run a function to a matrix or data-frame (apply), lists (lapply or sapply), or vectors (tapply). Utilizing apply-family functions allows us to simplify batch calculations and reduce possible errors. As an example, it can be used for calculating mean expression levels for many genes or samples.
