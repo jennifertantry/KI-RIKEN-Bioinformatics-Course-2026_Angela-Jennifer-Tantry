@@ -1,0 +1,186 @@
+---
+title: "Task 8_chromosome and protein dataset"
+author: "Angela Jennifer Tantry"
+date: "2026-11-01"
+output: html_document
+---
+
+To perform this task, the tidybiology package is installed and loaded.
+```{r, message=FALSE}
+# Load the package
+library(tidybiology)
+library(tidyverse)
+```
+
+# a. Summary statistics (mean, median, and maximum) from 'chromosome' data
+Summary statistics for chromosome data is obtained using the following script:
+```{r}
+# Obtain mean, median, and maximum
+chromosome_summary <- chromosome %>%
+  summarise(
+    across(       # apply function across selected columns
+      c(variations, protein_codinggenes, mi_rna), # tell columns to perform the function on
+    list(               # instruct functions to be run
+      mean = mean,
+      median = median,
+      maximum = max
+      )
+    )
+  )
+print(chromosome_summary, width = Inf)
+```
+
+# b. Chromosome size distribution and plot
+First, the chromosome size distribution plot is made based on the number of base pairs:
+```{r}
+# Make the plot using base pairs data
+ggplot(chromosome,
+  aes(x = basepairs)) +
+  geom_histogram(
+    bins = 20,
+    fill = "cadetblue2",
+    color = "black"
+  ) +
+  labs(
+    title = "Chromosome Size Distribution (Base Pairs)",
+    x = "Chromosome size (base pairs)",
+    y = "Number of Chromosomes"
+  ) +
+  scale_x_continuous(
+    labels = scales::label_number(scale = 1e-6, suffix = "Mbp") # adjust x axis to Mbp
+  ) +
+  theme_classic() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+Based on the plot, the chromosome size based on the base pairs seem to have relatively broad distribution. Most chromosomes are small to medium sized.
+
+Second, the chromosome size distribution plot is made based on the length in millimeters:
+```{r}
+# Make the plot using length_mm data
+ggplot(chromosome,
+  aes(x = length_mm)) +
+  geom_histogram(
+    bins = 20,
+    fill = "cadetblue2",
+    color = "black"
+  ) +
+  labs(
+    title = "Chromosome Size Distribution (in millimeter)",
+    x = "Chromosome size (mm)",
+    y = "Number of Chromosomes"
+  ) +
+  theme_classic() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+In contrast, distribution of chromosome size based on the chromosome length in millimeters seem to be less clear visually.
+
+Therefore, chromosome length in base pairs will be used to address the next question.
+
+# c. Relationships between protein coding genes or miRNAs with the length of the chromosome
+First, to explore the relationship between protein coding genes with the length of the chromosome, the following plot is made:
+```{r}
+# Make the plot for length vs. protein-coding genes
+ggplot(chromosome, aes(
+  x = basepairs,
+  y = protein_codinggenes
+  )) +
+  geom_point() +
+  labs(
+    title = "Relationship between Chromosome Length and Protein-coding Genes",
+    x = "Chromosome length (Mbp)",
+    y = "Number of protein-coding genes"
+  ) +
+  scale_x_continuous(
+    labels = scales::label_number(scale = 1e-6, suffix = " Mbp") # adjust x axis to Mbp
+  ) +
+  theme_classic() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+Based on the plot, the number of protein coding genes generally increase along with the chromosome length, indicating a positive correlation.
+```{r}
+# Make the plot for length vs. miRNA
+ggplot(chromosome, aes(
+  x = basepairs,
+  y = mi_rna
+  )) +
+  geom_point() +
+  labs(
+    title = "Relationship between Chromosome Length and miRNA",
+    x = "Chromosome length (Mbp)",
+    y = "miRNA"
+  ) +
+  scale_x_continuous(
+    labels = scales::label_number(scale = 1e-6, suffix = "Mbp") # adjust x axis to Mbp
+  ) +
+  theme_classic() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+Based on the plot, the number of miRNA also increased along with the chromosome length, also indicating a positive correlation.
+
+To further confirm the correlation between chromosome length and protein-coding genes, as well as chromosome length and miRNA, Pearson's correlation coefficient can be used:
+```{r}
+cor(chromosome$basepairs, chromosome$protein_codinggenes)
+cor(chromosome$basepairs, chromosome$mi_rna)
+```
+
+Both results in a positive value, suggesting that longer chromosome tend to contain more protein-coding genes and miRNA.
+
+# d. Summary statistics and visualization for length and mass from 'proteins' data
+Summary statistics for length and mass data
+```{r}
+# Obtain mean, median, and maximum
+proteins_summary <- proteins %>%
+  summarise(
+    across(
+      c(length, mass),
+      list(
+      mean = mean,
+      median = median,
+      maximum = max
+      )
+    )
+  )
+print(proteins_summary, width = Inf)
+```
+
+Visualization of the relationship between length and mass by utilizing the ggplot2 package functions
+```{r}
+# Make the plot
+ggplot(proteins, aes(
+  x = length,
+  y = mass)) +
+  geom_point() +
+  labs(
+    title = "Relationship between Protein Length and Mass",
+    x = "Length",
+    y = "Mass (in kDa)"
+  ) +
+  scale_y_continuous(
+  labels = scales::label_number(scale = 1e-3, suffix = " kDa")  # adjust y axis to kDa
+  ) +
+  theme_classic() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+ 
+To make the relationship clearer, the visualization can also be made in logarithmic scale with the following script:
+```{r}
+   ggplot(proteins, aes(
+  x = length,
+  y = mass)) +
+  geom_point() +
+  labs(
+    title = "Relationship between Protein Length and Mass",
+    x = "Length",
+    y = "Mass"
+  ) +
+  scale_x_log10() +      # logarithmic scaling to x axis
+  scale_y_log10() +      # logarithmic scaling to y axis
+  theme_classic() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+Based on the plot, the length and mass of proteins have positive correlation. Longer proteins generally have higher molecular mass. The relationship also appears to be linear on the log-log scale.
